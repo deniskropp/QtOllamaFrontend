@@ -36,7 +36,7 @@ Dialog {
                 }
                 Label {
                     antialiasing: true
-                    text: "<a href=\"https://github.com/bkweb/ModxLinguist\">https://github.com/bkweb/ModxLinguist</a>"
+                    text: "<a href=\"https://github.com/bkweb/QtOllamaFrontend\">https://github.com/bkweb/QtOllamaFrontend</a>"
                     onLinkActivated: function(link) {
                         Qt.openUrlExternally(link);
                     }
