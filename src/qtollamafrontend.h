@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QTcpSocket>
 #include <QTextToSpeech>
 #include <QDomDocument>
 #include <QMimeDatabase>
@@ -46,6 +47,7 @@ class QtOllamaFrontend : public QObject
     const QString API_GENERATE_URI = "/api/generate";
     const QString API_PS_URI = "/api/ps";
     const QString API_PULL_URI = "/api/pull";
+    const QString API_DELETE_URI = "/api/delete";
     const QString API_MODEL_NAME = "llama3.2:latest";
     const int API_SEED = 0;
     const int SHOW_LOG = 1;
@@ -74,6 +76,8 @@ class QtOllamaFrontend : public QObject
     double m_ttsRate = 0.0;
     double m_ttsPitch = 0.0;
     // methods:
+    QString createHttpPostRequest(const QString &apiUri, const QString &jsonString);
+    QString createHttpDeleteRequest(const QString &apiUri, const QString &jsonString);
     QNetworkRequest createNetworkRequest(const QUrl &url, const QByteArray &bytes = QByteArray());
     QString convertJsonToString(const QJsonObject &data);
     QString convertJsonToString(const QJsonArray &data);
@@ -86,8 +90,10 @@ class QtOllamaFrontend : public QObject
     void outputRequest(const QString request);
     void outputResponse(const QString response);
     void emitNetworkError(QNetworkReply *reply);
+    void emitNetworkError(QTcpSocket *tcpSocket);
     void loadSettings();
     QByteArray prepareJsonForLogOutput(const QJsonObject &jsonObject);
+    QStringList extractJsonStrings(const QString &string);
 signals:
     void loadingChanged();
     void hostChanged();
@@ -118,13 +124,16 @@ signals:
     void receivedLoadedModels(const QVariant result);
     void receivedLoadedModel(const QVariant result);
     void receivedUnloadedModel(const QVariant result);
+    void receivedPullModelProgress(QString modelName, QString status, qint64 bytesReceived, qint64 bytesTotal);
     void receivedPullModel(const QVariant result);
+    void receivedDeleteModel(const QVariant result);
 public slots:
     void loadModel(QString modelName);
     void unloadModel(QString modelName);
     void getLoadedModels();
     void getModels();
     void pullModel(QString modelName);
+    void deleteModel(QString modelName);
     void startNewChat();
     void sendMessage(QString content, QString jsonImageFilePaths);
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);

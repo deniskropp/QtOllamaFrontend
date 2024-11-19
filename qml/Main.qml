@@ -118,26 +118,7 @@ ApplicationWindow {
                 "data": ""
             });
         }
-        /*
-        function onReceivedDownloadProgress(bytesReceived, bytesTotal) {
-            console.log("bytes downloaded:", bytesReceived + " / " + bytesTotal);
-
-            //var percentage = parseInt((parseFloat(bytesReceived) / parseFloat(bytesTotal)) * 100.0);
-            //progressBar.value = percentage
-            //labelProgress.text = qsTr("%1 %, bytes downloaded: %2 / %3 bytes").arg(percentage).arg(getPrettyPrintedSize(bytesReceived)).arg(getPrettyPrintedSize(bytesTotal));
-        }
-        */
-        function onReceivedUploadProgress(bytesSent, bytesTotal) {
-            console.log("bytes uploaded:", bytesSent + " / " + bytesTotal);
-            /*
-            var percentage = parseInt((parseFloat(bytesReceived) / parseFloat(bytesTotal)) * 100.0);
-            progressBar.value = percentage
-            labelProgress.text = qsTr("%1 %, bytes uploaded: %2 / %3 bytes").arg(percentage).arg(getPrettyPrintedSize(bytesSent)).arg(getPrettyPrintedSize(bytesTotal));
-            */
-        }
         function onLog(title, data) {
-            //console.log("log data:", title, data);
-
             var json = {};
 
             try {
@@ -411,6 +392,7 @@ ApplicationWindow {
                 text: qsTr("&New Chat")
                 onTriggered: qtOllamaFrontend.startNewChat()
             }
+            MenuSeparator { }
             DialogImage {
                 id: dialogImage
                 onAccepted: {
@@ -580,30 +562,6 @@ ApplicationWindow {
                 Layout.rightMargin: 10
                 text: qtOllamaFrontend.modelName
             }
-
-            /*
-            CustomLabel {
-                id: labelProgress
-                Layout.topMargin: 10
-                Layout.bottomMargin: 10
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
-                Layout.preferredWidth: 0.75 * appWindow.width
-                horizontalAlignment: Text.AlignRight
-                verticalAlignment: Text.AlignVCenter
-            }
-            ProgressBar {
-                id: progressBar
-                Layout.fillWidth: true
-                Layout.topMargin: 10
-                Layout.bottomMargin: 10
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
-                from: 0
-                to: 100
-                value: 0
-            }
-            */
         }
     }
 }

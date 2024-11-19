@@ -6,28 +6,27 @@ import QtOllamaFrontend.QtOllamaFrontend 1.0
 Dialog {
     id: dialog
     property var models: [
-        {"description": "Llama 3.2", "parameter_size": "3B", "size": "2.0 GB", "name": "llama3.2"},
-        {"description": "Llama 3.2", "parameter_size": "1B", "size": "1.3 GB", "name": "llama3.2:1b"},
-        {"description": "Llama 3.2 Vision", "parameter_size": "11B", "size": "7.9 GB", "name": "llama3.2-vision"},
-        {"description": "Llama 3.2 Vision", "parameter_size": "90B", "size": "55 GB", "name": "llama3.2-vision:90b"},
-        {"description": "Llama 3.1", "parameter_size": "8B", "size": "4.7 GB", "name": "llama3.1"},
-        {"description": "Llama 3.1", "parameter_size": "70B", "size": "40 GB", "name": "llama3.1:70b"},
-        {"description": "Llama 3.1", "parameter_size": "405B", "size": "231 GB", "name": "llama3.1:405b"},
-        {"description": "Phi 3 Mini", "parameter_size": "3.8B", "size": "2.3 GB", "name": "phi3"},
-        {"description": "Phi 3 Medium", "parameter_size": "14B", "size": "7.9 GB", "name": "phi3:medium"},
-        {"description": "Gemma 2", "parameter_size": "2B", "size": "1.6 GB", "name": "gemma2:2b"},
-        {"description": "Gemma 2", "parameter_size": "9B", "size": "5.5 GB", "name": "gemma2"},
-        {"description": "Gemma 2", "parameter_size": "27B", "size": "16 GB", "name": "gemma2:27b"},
-        {"description": "Mistral", "parameter_size": "7B", "size": "4.1 GB", "name": "mistral"},
-        {"description": "Moondream 2", "parameter_size": "1.4B", "size": "829 MB", "name": "moondream"},
-        {"description": "Neural Chat", "parameter_size": "7B", "size": "4.1 GB", "name": "neural-chat"},
-        {"description": "Starling", "parameter_size": "7B", "size": "4.1 GB", "name": "starling-lm"},
-        {"description": "Code Llama", "parameter_size": "7B", "size": "3.8 GB", "name": "codellama"},
-        {"description": "Llama 2 Uncensored", "parameter_size": "7B", "size": "3.8 GB", "name": "llama2-uncensored"},
-        {"description": "LLaVA", "parameter_size": "7B", "size": "4.5 GB", "name": "llava"},
-        {"description": "Solar", "parameter_size": "10.7B", "size": "6.1 GB", "name": "solar"}
+        {"description": "Moondream 2", "parameter_size": "1.4B", "size": "829 MB", "name": "moondream", "pulled": false},
+        {"description": "Llama 3.2", "parameter_size": "3B", "size": "2.0 GB", "name": "llama3.2", "pulled": false},
+        {"description": "Llama 3.2", "parameter_size": "1B", "size": "1.3 GB", "name": "llama3.2:1b", "pulled": false},
+        {"description": "Llama 3.2 Vision", "parameter_size": "11B", "size": "7.9 GB", "name": "llama3.2-vision", "pulled": false},
+        {"description": "Llama 3.2 Vision", "parameter_size": "90B", "size": "55 GB", "name": "llama3.2-vision:90b", "pulled": false},
+        {"description": "Llama 3.1", "parameter_size": "8B", "size": "4.7 GB", "name": "llama3.1", "pulled": false},
+        {"description": "Llama 3.1", "parameter_size": "70B", "size": "40 GB", "name": "llama3.1:70b", "pulled": false},
+        {"description": "Llama 3.1", "parameter_size": "405B", "size": "231 GB", "name": "llama3.1:405b", "pulled": false},
+        {"description": "Phi 3 Mini", "parameter_size": "3.8B", "size": "2.3 GB", "name": "phi3", "pulled": false},
+        {"description": "Phi 3 Medium", "parameter_size": "14B", "size": "7.9 GB", "name": "phi3:medium", "pulled": false},
+        {"description": "Gemma 2", "parameter_size": "2B", "size": "1.6 GB", "name": "gemma2:2b", "pulled": false},
+        {"description": "Gemma 2", "parameter_size": "9B", "size": "5.5 GB", "name": "gemma2", "pulled": false},
+        {"description": "Gemma 2", "parameter_size": "27B", "size": "16 GB", "name": "gemma2:27b", "pulled": false},
+        {"description": "Mistral", "parameter_size": "7B", "size": "4.1 GB", "name": "mistral", "pulled": false},
+        {"description": "Neural Chat", "parameter_size": "7B", "size": "4.1 GB", "name": "neural-chat", "pulled": false},
+        {"description": "Starling", "parameter_size": "7B", "size": "4.1 GB", "name": "starling-lm", "pulled": false},
+        {"description": "Code Llama", "parameter_size": "7B", "size": "3.8 GB", "name": "codellama", "pulled": false},
+        {"description": "Llama 2 Uncensored", "parameter_size": "7B", "size": "3.8 GB", "name": "llama2-uncensored", "pulled": false},
+        {"description": "LLaVA", "parameter_size": "7B", "size": "4.5 GB", "name": "llava", "pulled": false},
+        {"description": "Solar", "parameter_size": "10.7B", "size": "6.1 GB", "name": "solar", "pulled": false}
     ]
-    property int pullingModelIndex: -1
     title: qsTr("Pull Model")
     standardButtons: Dialog.Close
     modal: true
@@ -42,17 +41,28 @@ Dialog {
             return;
         }
 
-        listViewModels.addModels(models);
+        qtOllamaFrontend.getModels();
     }
     Connections {
         target: qtOllamaFrontend
         ignoreUnknownSignals: true
-        function onReceivedDownloadProgress(bytesReceived, bytesTotal) {
-            //console.log("bytes downloaded:", bytesReceived + " / " + bytesTotal);
+        function onReceivedModels(result) {
+            const pulledModels = JSON.parse(result);
+            const allModels = models.map((model) => model.name);
 
-            listModelModels.set(pullingModelIndex, {
-                "downloadedBytes": listViewModels.getPrettyPrintedSize(bytesReceived)
+            // set the already pulled models as "pulled"
+            pulledModels.models.forEach((pulledModel) => {
+                const index = allModels.indexOf(pulledModel.name.split(":latest")[0]);
+
+                if (index >= 0) {
+                    models[index].pulled = true;
+                }
             });
+
+            // show already pulled models first
+            models.sort((a, b) => parseInt(b.pulled ? 1 : 0) - parseInt(a.pulled ? 1 : 0));
+
+            listViewModels.addModels(models);
         }
     }
     contentItem: ColumnLayout {
@@ -74,7 +84,7 @@ Dialog {
                         "name": model.name,
                         "size": model.size,
                         "parameterSize": model.parameter_size,
-                        "downloadedBytes": ""
+                        "pulled": model.pulled
                     });
                 });
             }
@@ -114,54 +124,105 @@ Dialog {
                 id: listModelModels
             }
             delegate: ItemDelegate {
-                id: item
+                id: itemDelegate
                 width: listViewModels.width - scrollBarEntries.width
-                height: itemDelegateRow.height
-                Rectangle {
-                    id: itemDelegateRow
+                height: itemDelegateColumn.height
+                ColumnLayout {
+                    id: itemDelegateColumn
                     width: parent.width
-                    height: itemDelegateColumnLayout.height
-                    ColumnLayout {
-                        id: itemDelegateColumnLayout
-                        width: parent.width
-                        RowLayout {
+                    RowLayout {
+                        Layout.fillWidth: true
+                        CustomLabel {
                             Layout.fillWidth: true
-                            CustomLabel {
-                                Layout.fillWidth: true
-                                Layout.topMargin: 10
-                                wrapMode: Text.WordWrap
-                                text: model.description + "  (" + model.name + ")"
-                            }
-                            CustomLabel {
-                                Layout.preferredWidth: 0.2 * parent.width
-                                Layout.topMargin: 10
-                                text: model.parameterSize
-                            }
-                            CustomLabel {
-                                Layout.preferredWidth: 0.2 * parent.width
-                                Layout.topMargin: 10
-                                Layout.alignment: Qt.AlignRight
-                                text: model.size
-                            }
+                            Layout.topMargin: 10
+                            wrapMode: Text.WordWrap
+                            text: model.description + "  (" + model.name + ")"
                         }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            // select
-                            CustomButton {
-                                Layout.leftMargin: 10
-                                Layout.bottomMargin: 10
-                                enabled: !qtOllamaFrontend.loading
-                                text: qsTr("Pull")
-                                onClicked: {
-                                    pullingModelIndex = model.index;
-
+                        CustomLabel {
+                            Layout.preferredWidth: 0.2 * parent.width
+                            Layout.topMargin: 10
+                            text: model.parameterSize
+                        }
+                        CustomLabel {
+                            Layout.preferredWidth: 0.2 * parent.width
+                            Layout.topMargin: 10
+                            Layout.alignment: Qt.AlignRight
+                            text: model.size
+                        }
+                    }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Rectangle {
+                            Layout.preferredWidth: 10
+                            Layout.preferredHeight: 10
+                            Layout.alignment: Qt.AlignVCenter
+                            color: buttonPullDelete.pulled ? "lightgreen" : "transparent"
+                        }
+                        // pull / delete
+                        CustomButton {
+                            id: buttonPullDelete
+                            property bool pulled: model.pulled
+                            Layout.leftMargin: 10
+                            Layout.rightMargin: 10
+                            Layout.bottomMargin: 10
+                            enabled: !qtOllamaFrontend.loading
+                            text: pulled ? qsTr("Delete") : qsTr("Pull")
+                            onClicked: {
+                                if (pulled) {
+                                    qtOllamaFrontend.deleteModel(model.name);
+                                } else {
                                     qtOllamaFrontend.pullModel(model.name);
                                 }
                             }
-                            CustomLabel {
-                                Layout.fillWidth: true
-                                Layout.leftMargin: 10
-                                text: model.downloadedBytes
+                        }
+                        ProgressBar {
+                            id: progressBar
+                            Layout.fillWidth: true
+                            Layout.leftMargin: 10
+                            Layout.rightMargin: 30
+                            Layout.bottomMargin: 10
+                            from: 0
+                            to: 100
+                            value: 0
+                            visible: value > 0
+                        }
+                    }
+                    CustomLabel {
+                        id: labelProgress
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: 10
+                        Layout.leftMargin: 10
+                        Layout.rightMargin: 10
+                        visible: progressBar.value > 0
+                    }
+                }
+                Connections {
+                    target: qtOllamaFrontend
+                    ignoreUnknownSignals: true
+                    function onReceivedPullModelProgress(modelName, status, bytesReceived, bytesTotal) {
+                        if (model.name === modelName) {
+                            var percentage = parseInt((parseFloat(bytesReceived) / parseFloat(bytesTotal)) * 100.0);
+                            progressBar.value = percentage;
+                            labelProgress.text = qsTr("%1: %2 %, %3 / %4").arg(status).arg(percentage).arg(listViewModels.getPrettyPrintedSize(bytesReceived)).arg(listViewModels.getPrettyPrintedSize(bytesTotal));
+                        }
+                    }
+                    function onReceivedPullModel(result) {
+                        result = JSON.parse(result);
+
+                        if (result.model == model.name) {
+                            if (result.success) {
+                                buttonPullDelete.pulled = true;
+                            }
+
+                            progressBar.value = 0;
+                        }
+                    }
+                    function onReceivedDeleteModel(result) {
+                        result = JSON.parse(result);
+
+                        if (result.model == model.name) {
+                            if (result.success) {
+                                buttonPullDelete.pulled = false;
                             }
                         }
                     }

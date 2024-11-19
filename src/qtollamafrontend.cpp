@@ -317,6 +317,30 @@ QByteArray QtOllamaFrontend::prepareJsonForLogOutput(const QJsonObject &jsonObje
     return convertToBytes(copiedObject);
 }
 
+QStringList QtOllamaFrontend::extractJsonStrings(const QString &string) {
+    QStringList jsonStrings;
+
+    QString regExpString = "(\\{(\"|:|,|\\w*|\\s*)*\\})";
+    QRegularExpression regularExpression(regExpString, QRegularExpression::DotMatchesEverythingOption);
+
+    QRegularExpressionMatchIterator iteratorMatch = regularExpression.globalMatch(string);
+    while (iteratorMatch.hasNext()) {
+        QRegularExpressionMatch match = iteratorMatch.next();
+
+        jsonStrings << match.captured(1);
+    }
+
+    return jsonStrings;
+}
+
+QString QtOllamaFrontend::createHttpPostRequest(const QString &apiUri, const QString &jsonString) {
+    return "POST " + apiUri + " HTTP/1.1\r\nHost: " + m_host + "\r\nContent-Type: application/json\r\nContent-Length: " + QString::number(jsonString.size()) + "\r\n\r\n" + jsonString + "\r\n";
+}
+
+QString QtOllamaFrontend::createHttpDeleteRequest(const QString &apiUri, const QString &jsonString) {
+    return "DELETE " + apiUri + " HTTP/1.1\r\nHost: " + m_host + "\r\nContent-Type: application/json\r\nContent-Length: " + QString::number(jsonString.size()) + "\r\n\r\n" + jsonString + "\r\n";
+}
+
 QNetworkRequest QtOllamaFrontend::createNetworkRequest(const QUrl &url, const QByteArray &bytes) {
     QByteArray postDataSize = QByteArray::number(bytes.size());
 
@@ -332,9 +356,14 @@ QNetworkRequest QtOllamaFrontend::createNetworkRequest(const QUrl &url, const QB
     return request;
 }
 
-void QtOllamaFrontend::emitNetworkError(QNetworkReply* reply) {
+void QtOllamaFrontend::emitNetworkError(QNetworkReply *reply) {
     qDebug() << "network error:" << reply->errorString();
     emit receivedNetworkError(reply->errorString());
+}
+
+void QtOllamaFrontend::emitNetworkError(QTcpSocket *tcpSocket) {
+    qDebug() << "network error:" << tcpSocket->errorString();
+    emit receivedNetworkError(tcpSocket->errorString());
 }
 
 void QtOllamaFrontend::downloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
@@ -859,6 +888,61 @@ void QtOllamaFrontend::unloadModel(QString modelName) {
     });
 }
 
+void QtOllamaFrontend::deleteModel(QString modelName) {
+    setLoading(true);
+
+    // form json object for parameters
+    QJsonObject params;
+    params.insert("model", QJsonValue(modelName));
+
+    // convert json object to QByteArray
+    QByteArray jsonBytes = convertToBytes(params);
+    outputRequest(QString(jsonBytes));
+
+    // output log
+    emit log("json sent delete model request", jsonBytes);
+
+    // send request and receive streaming response
+    QTcpSocket *tcpSocket = new QTcpSocket(this);
+    tcpSocket->connectToHost(QHostAddress(m_host), m_port, QIODevice::ReadWrite);
+    if (!tcpSocket->waitForConnected()) {
+        emitNetworkError(tcpSocket);
+    }
+
+    QString httpDeleteRequest = createHttpDeleteRequest(API_DELETE_URI, jsonBytes);
+    emit log("sent HTTP DELETE request", httpDeleteRequest);
+
+    // send request
+    tcpSocket->write(httpDeleteRequest.toUtf8());
+    if (!tcpSocket->waitForBytesWritten()) {
+        emitNetworkError(tcpSocket);
+    }
+
+    connect(tcpSocket, &QIODevice::readyRead, [this, tcpSocket, modelName]() {
+        setLoading(false);
+
+        QString data(tcpSocket->readAll());
+        qDebug() << "received data:" << data;
+
+        // check if delete was successful
+        bool success = false;
+        if (data.startsWith("HTTP/1.1 200 OK")) {
+            success = true;
+            qDebug() << "received HTTP DELETE response 200 OK";
+            emit log("received HTTP DELETE response 200 OK", data);
+        } else {
+            qDebug() << "received HTTP DELETE response error code";
+            emit log("received HTTP DELETE response error code", data);
+        }
+
+        QJsonObject result;
+        result.insert("model", QJsonValue(modelName));
+        result.insert("success", QJsonValue(success));
+
+        emit receivedDeleteModel(convertToBytes(result));
+    });
+}
+
 void QtOllamaFrontend::pullModel(QString modelName) {
     setLoading(true);
 
@@ -871,36 +955,54 @@ void QtOllamaFrontend::pullModel(QString modelName) {
     QByteArray jsonBytes = convertToBytes(params);
     outputRequest(QString(jsonBytes));
 
-    // form url
-    QUrl url("http://" + m_host + ":" + QString::number(m_port) + API_PULL_URI);
-
-    // form request object
-    QNetworkRequest request = createNetworkRequest(url, jsonBytes);
-
     // output log
-    emit log("json sent pull model request", jsonBytes);
+    emit log("json data for pull model request", jsonBytes);
+
+    // send request and receive streaming response
+    QTcpSocket *tcpSocket = new QTcpSocket(this);
+    tcpSocket->connectToHost(QHostAddress(m_host), m_port, QIODevice::ReadWrite);
+    if (!tcpSocket->waitForConnected()) {
+        emitNetworkError(tcpSocket);
+    }
+
+    QString httpPostRequest = createHttpPostRequest(API_PULL_URI, jsonBytes);
+    emit log("sent HTTP POST request", httpPostRequest);
 
     // send request
-    QNetworkReply* reply = m_networkAccessManager->post(request, jsonBytes);
-    connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
-            this, SLOT(downloadProgress(qint64,qint64)));
-    connect(reply, SIGNAL(uploadProgress(qint64,qint64)),
-            this, SLOT(uploadProgress(qint64,qint64)));
-    connect(reply, &QNetworkReply::finished, [this, reply]() {
-        setLoading(false);
+    tcpSocket->write(httpPostRequest.toUtf8());
+    if (!tcpSocket->waitForBytesWritten()) {
+        emitNetworkError(tcpSocket);
+    }
 
-        if (reply->error() != QNetworkReply::NoError) {
-            emitNetworkError(reply);
-            return;
+    connect(tcpSocket, &QIODevice::readyRead, [this, tcpSocket, modelName]() {
+        QString data(tcpSocket->readAll());
+
+        // check if post was successful
+        if (data.startsWith("HTTP/1.1 200 OK")) {
+            qDebug() << "received HTTP POST response 200 OK";
+            emit log("received HTTP POST response 200 OK", data);
+        } else if (data.startsWith("HTTP/1.1")) {
+            qDebug() << "received HTTP POST response error code";
+            emit log("received HTTP POST response error code", data);
+        } else {
+            // process status json object
+            QStringList jsonStrings = extractJsonStrings(data);
+
+            for (QString jsonString : jsonStrings) {
+                QJsonObject jsonObject = convertToJsonObject(jsonString);
+
+                if (jsonObject.value("status").toString() == "success") {
+                    setLoading(false);
+
+                    QJsonObject result;
+                    result.insert("model", QJsonValue(modelName));
+                    result.insert("success", QJsonValue(true));
+
+                    emit receivedPullModel(convertToBytes(result));
+                } else {
+                    emit receivedPullModelProgress(modelName, jsonObject.value("status").toString(), jsonObject.value("completed").toInt(), jsonObject.value("total").toInt());
+                }
+            }
         }
-
-        QByteArray data = reply->readAll();
-        outputResponse(data);
-
-        // output log
-        emit log("load model response", data);
-
-        // output received pull model
-        emit receivedPullModel(data);
     });
 }
