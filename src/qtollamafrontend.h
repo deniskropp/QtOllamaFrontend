@@ -128,6 +128,8 @@ signals:
     void receivedPullModel(const QVariant result);
     void receivedDeleteModel(const QVariant result);
 public slots:
+    bool addModelToDb(QString name, QString description, QString parameterSize, QString size);
+    QVariantList getModelsFromDb();
     void loadModel(QString modelName);
     void unloadModel(QString modelName);
     void getLoadedModels();

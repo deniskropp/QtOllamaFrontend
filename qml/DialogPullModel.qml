@@ -5,28 +5,6 @@ import QtOllamaFrontend.QtOllamaFrontend 1.0
 
 Dialog {
     id: dialog
-    property var models: [
-        {"description": "Moondream 2", "parameter_size": "1.4B", "size": "829 MB", "name": "moondream", "pulled": false},
-        {"description": "Llama 3.2", "parameter_size": "3B", "size": "2.0 GB", "name": "llama3.2", "pulled": false},
-        {"description": "Llama 3.2", "parameter_size": "1B", "size": "1.3 GB", "name": "llama3.2:1b", "pulled": false},
-        {"description": "Llama 3.2 Vision", "parameter_size": "11B", "size": "7.9 GB", "name": "llama3.2-vision", "pulled": false},
-        {"description": "Llama 3.2 Vision", "parameter_size": "90B", "size": "55 GB", "name": "llama3.2-vision:90b", "pulled": false},
-        {"description": "Llama 3.1", "parameter_size": "8B", "size": "4.7 GB", "name": "llama3.1", "pulled": false},
-        {"description": "Llama 3.1", "parameter_size": "70B", "size": "40 GB", "name": "llama3.1:70b", "pulled": false},
-        {"description": "Llama 3.1", "parameter_size": "405B", "size": "231 GB", "name": "llama3.1:405b", "pulled": false},
-        {"description": "Phi 3 Mini", "parameter_size": "3.8B", "size": "2.3 GB", "name": "phi3", "pulled": false},
-        {"description": "Phi 3 Medium", "parameter_size": "14B", "size": "7.9 GB", "name": "phi3:medium", "pulled": false},
-        {"description": "Gemma 2", "parameter_size": "2B", "size": "1.6 GB", "name": "gemma2:2b", "pulled": false},
-        {"description": "Gemma 2", "parameter_size": "9B", "size": "5.5 GB", "name": "gemma2", "pulled": false},
-        {"description": "Gemma 2", "parameter_size": "27B", "size": "16 GB", "name": "gemma2:27b", "pulled": false},
-        {"description": "Mistral", "parameter_size": "7B", "size": "4.1 GB", "name": "mistral", "pulled": false},
-        {"description": "Neural Chat", "parameter_size": "7B", "size": "4.1 GB", "name": "neural-chat", "pulled": false},
-        {"description": "Starling", "parameter_size": "7B", "size": "4.1 GB", "name": "starling-lm", "pulled": false},
-        {"description": "Code Llama", "parameter_size": "7B", "size": "3.8 GB", "name": "codellama", "pulled": false},
-        {"description": "Llama 2 Uncensored", "parameter_size": "7B", "size": "3.8 GB", "name": "llama2-uncensored", "pulled": false},
-        {"description": "LLaVA", "parameter_size": "7B", "size": "4.5 GB", "name": "llava", "pulled": false},
-        {"description": "Solar", "parameter_size": "10.7B", "size": "6.1 GB", "name": "solar", "pulled": false}
-    ]
     title: qsTr("Pull Model")
     standardButtons: Dialog.Close
     modal: true
@@ -47,6 +25,18 @@ Dialog {
         target: qtOllamaFrontend
         ignoreUnknownSignals: true
         function onReceivedModels(result) {
+            var modelsFromDb = qtOllamaFrontend.getModelsFromDb();
+            var models = [];
+            modelsFromDb.forEach((modelFromDb) => {
+                models.push({
+                    "name": modelFromDb.name,
+                    "description": modelFromDb.description,
+                    "parameter_size": modelFromDb.parameter_size,
+                    "size": modelFromDb.size,
+                    "pulled": false
+                });
+            });
+
             const pulledModels = JSON.parse(result);
             const allModels = models.map((model) => model.name);
 

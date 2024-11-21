@@ -797,6 +797,14 @@ void QtOllamaFrontend::getLoadedModels() {
     });
 }
 
+bool QtOllamaFrontend::addModelToDb(QString name, QString description, QString parameterSize, QString size) {
+    return m_databaseComponent->addModel(name, description, parameterSize, size);
+}
+
+QVariantList QtOllamaFrontend::getModelsFromDb() {
+    return m_databaseComponent->getAllRows(m_databaseComponent->getTableModel(), QStringList() << "*", "name", "ASC");
+}
+
 void QtOllamaFrontend::loadModel(QString modelName) {
     setLoading(true);
 
@@ -1000,7 +1008,7 @@ void QtOllamaFrontend::pullModel(QString modelName) {
 
                     emit receivedPullModel(convertToBytes(result));
                 } else {
-                    emit receivedPullModelProgress(modelName, jsonObject.value("status").toString(), jsonObject.value("completed").toInt(), jsonObject.value("total").toInt());
+                    emit receivedPullModelProgress(modelName, jsonObject.value("status").toString(), jsonObject.value("completed").toInteger(), jsonObject.value("total").toInteger());
                 }
             }
         }

@@ -32,6 +32,19 @@ Dialog {
                 Label {
                     Layout.alignment: Qt.AlignRight
                     Layout.rightMargin: 10
+                    text: "Website"
+                }
+                Label {
+                    antialiasing: true
+                    text: "<a href=\"https://ollama.com\">https://ollama.com</a>"
+                    onLinkActivated: function(link) {
+                        Qt.openUrlExternally(link);
+                    }
+                }
+                // github
+                Label {
+                    Layout.alignment: Qt.AlignRight
+                    Layout.rightMargin: 10
                     text: "Github"
                 }
                 Label {

@@ -23,7 +23,7 @@ class DatabaseComponent : public QObject
     Q_OBJECT
     // constants:
     const QString DATABASE_DRIVER = "QSQLITE";
-    const QString DATABASE_FILE = "db-queue-downloader.db";
+    const QString DATABASE_FILE = "db-qt-ollama-frontend.db";
     const QString TABLE_LOG = "log";
     const QString QUERY_CREATE_LOG =
             "CREATE TABLE IF NOT EXISTS " + TABLE_LOG +
@@ -32,9 +32,16 @@ class DatabaseComponent : public QObject
             "text TEXT)";
     const QString TABLE_SETTINGS = "settings";
     const QString QUERY_CREATE_SETTINGS =
-        "CREATE TABLE IF NOT EXISTS " + TABLE_SETTINGS +
-        "(key TEXT PRIMARY KEY NOT NULL,"
-        "value TEXT)";
+            "CREATE TABLE IF NOT EXISTS " + TABLE_SETTINGS +
+            "(key TEXT PRIMARY KEY NOT NULL,"
+            "value TEXT)";
+    const QString TABLE_MODEL = "model";
+    const QString QUERY_CREATE_MODEL =
+            "CREATE TABLE IF NOT EXISTS " + TABLE_MODEL +
+            "(name TEXT PRIMARY KEY NOT NULL,"
+            "description TEXT,"
+            "parameter_size TEXT,"
+            "size TEXT)";
     // attributes:
     QSqlDatabase m_databaseConnection;
     bool m_storeOnlyInMemory = false;
@@ -72,8 +79,13 @@ public slots:
                            const int &id);
     QJsonObject getSetting(QString key);
     void deleteDatabase();
+    bool addModel(const QString &name,
+                  const QString &description,
+                  const QString &parameterSize,
+                  const QString &size);
 public:
     QString getTableSettings();
+    QString getTableModel();
     // constructor:
     DatabaseComponent(QObject* parent = nullptr);
 };

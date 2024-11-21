@@ -412,6 +412,13 @@ ApplicationWindow {
                 text: qsTr("&Image")
                 onTriggered: dialogImage.open()
             }
+            DialogModelOptions {
+                id: dialogModelOptions
+            }
+            Action {
+                text: qsTr("&Export")
+                onTriggered: dialogModelOptions.open()
+            }
             MenuSeparator { }
             Action {
                 id: actionTextMessageMultiline
@@ -443,6 +450,16 @@ ApplicationWindow {
             Action {
                 text: qsTr("&Pull")
                 onTriggered: dialogPullModel.open()
+            }
+            DialogAddModel {
+                id: dialogAddModel
+                onAccepted: {
+                    qtOllamaFrontend.addModelToDb(modelName, modelDescription, modelParameterSize, modelSize);
+                }
+            }
+            Action {
+                text: qsTr("&Add")
+                onTriggered: dialogAddModel.open()
             }
         }
         Menu {

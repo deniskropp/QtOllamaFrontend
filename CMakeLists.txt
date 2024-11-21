@@ -30,9 +30,11 @@ qt_add_qml_module(appQtOllamaFrontend
         qml/CustomTextField.qml
         qml/DialogAbout.qml
         qml/DialogService.qml
+        qml/DialogAddModel.qml
         qml/DialogSelectModel.qml
         qml/DialogPullModel.qml
         qml/DialogModelSettings.qml
+        qml/DialogModelOptions.qml
         qml/DialogImage.qml
         qml/DialogTextToSpeech.qml
 )
