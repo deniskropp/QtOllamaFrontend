@@ -49,7 +49,7 @@ class DatabaseComponent : public QObject
     void setUpDatabase();
     QString convertJsonToString(const QJsonObject &data);
     void outputSqlError(const QSqlQuery &query);
-    int getCount(QString tableName);
+    int getCount(QString tableName, QString fieldName);
 signals:
     void databaseConnectionError(QString errorMessage);
     void logJsonDataResult(bool result, QString data);

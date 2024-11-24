@@ -35,9 +35,7 @@ Dialog {
             Layout.fillWidth: true
             Layout.rightMargin: 10
             text: qtOllamaFrontend.host
-            onTextChanged: {
-                qtOllamaFrontend.host = text;
-            }
+            onTextChanged: qtOllamaFrontend.host = text
         }
         // port
         CustomLabel {
@@ -49,10 +47,11 @@ Dialog {
             id: customTextFieldPort
             Layout.fillWidth: true
             Layout.rightMargin: 10
-            text: qtOllamaFrontend.port
-            onTextChanged: {
-                qtOllamaFrontend.port = text;
+            validator: RegularExpressionValidator {
+                regularExpression: /^[0-9]+$/
             }
+            text: qtOllamaFrontend.port
+            onTextChanged: qtOllamaFrontend.port = parseInt(text)
         }
         // button
         Item {}
@@ -62,7 +61,8 @@ Dialog {
             Layout.alignment: Qt.AlignRight
             text: qsTr("Reset Default")
             onClicked: {
-                qtOllamaFrontend.resetSettings();
+                qtOllamaFrontend.resetSettings([QtOllamaFrontend.ApiHost, QtOllamaFrontend.ApiPort]);
+
                 customTextFieldHost.text = qtOllamaFrontend.host;
                 customTextFieldPort.text = qtOllamaFrontend.port;
             }

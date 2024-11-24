@@ -23,10 +23,13 @@ Dialog {
         columns: 2
         Label {
             Layout.fillWidth: true
-            Layout.margins: 20
+            Layout.margins: 10
             Layout.columnSpan: parent.columns
             wrapMode: Text.WordWrap
-            text: qsTr("Add a model found in the Ollama model library.")
+            text: qsTr("Add a model found in the Ollama model library (<a href=\"https://ollama.com\">https://ollama.com</a>).")
+            onLinkActivated: function(link) {
+                Qt.openUrlExternally(link);
+            }
         }
         // name
         CustomLabel {

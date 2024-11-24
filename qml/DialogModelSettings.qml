@@ -17,20 +17,14 @@ Dialog {
     contentItem: GridLayout {
         columns: 3
         // seed
-        CustomLabel {
+        Item {}
+        CustomCheckBoxTextFieldInteger {
             Layout.margins: 10
-            Layout.alignment: Qt.AlignRight
-            text: qsTr("seed")
-        }
-        CustomTextField {
-            Layout.margins: 10
-            validator: RegularExpressionValidator {
-                regularExpression: /^[0-9]+$/
-            }
+            labelText: qsTr("seed")
+            checked: qtOllamaFrontend.seedApplied
+            onCheckedChanged: qtOllamaFrontend.seedApplied = checked
             text: qtOllamaFrontend.seed
-            onTextChanged: {
-                qtOllamaFrontend.seed = parseInt(text);
-            }
+            onTextChanged: qtOllamaFrontend.seed = parseInt(text)
         }
         CustomLabel {
             Layout.fillWidth: true

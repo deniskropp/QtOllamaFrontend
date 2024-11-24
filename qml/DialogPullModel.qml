@@ -143,10 +143,18 @@ Dialog {
                     RowLayout {
                         Layout.fillWidth: true
                         Rectangle {
-                            Layout.preferredWidth: 10
-                            Layout.preferredHeight: 10
+                            Layout.preferredWidth: labelPulled.contentWidth + 20
+                            Layout.preferredHeight: labelPulled.contentHeight
                             Layout.alignment: Qt.AlignVCenter
                             color: buttonPullDelete.pulled ? "lightgreen" : "transparent"
+                            visible: buttonPullDelete.pulled
+                            Label {
+                                id: labelPulled
+                                anchors.fill: parent
+                                anchors.leftMargin: 10
+                                anchors.rightMargin: 10
+                                text: qsTr("installed")
+                            }
                         }
                         // pull / delete
                         CustomButton {

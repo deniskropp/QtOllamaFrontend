@@ -31,26 +31,28 @@ void DatabaseComponent::setUpDatabase() {
     query(QUERY_CREATE_MODEL);
 
     // models
-    addModel("moondream", "Moondream 2", "1.4B", "829 MB");
-    addModel("llama3.2", "Llama 3.2", "3B", "2.0 GB");
-    addModel("llama3.2:1b", "Llama 3.2", "1B", "1.3 GB");
-    addModel("llama3.2-vision", "Llama 3.2 Vision", "11B", "7.9 GB");
-    addModel("llama3.2-vision:90b", "Llama 3.2 Vision", "90B", "55 GB");
-    addModel("llama3.1", "Llama 3.1", "8B", "4.7 GB");
-    addModel("llama3.1:70b", "Llama 3.1", "70B", "40 GB");
-    addModel("llama3.1:405b", "Llama 3.1", "405B", "231 GB");
-    addModel("phi3", "Phi 3 Mini", "3.8B", "2.3 GB");
-    addModel("phi3:medium", "Phi 3 Medium", "14B", "7.9 GB");
-    addModel("gemma2:2b", "Gemma 2", "2B", "1.6 GB");
-    addModel("gemma2", "Gemma 2", "9B", "5.5 GB");
-    addModel("gemma2:27b", "Gemma 2", "27B", "16 GB");
-    addModel("mistral", "Mistral", "7B", "4.1 GB");
-    addModel("neural-chat", "Neural Chat", "7B", "4.1 GB");
-    addModel("starling-lm", "Starling", "7B", "4.1 GB");
-    addModel("codellama", "Code Llama", "7B", "3.8 GB");
-    addModel("llama2-uncensored", "Llama 2 Uncensored", "7B", "3.8 GB");
-    addModel("llava", "LLaVA", "7B", "4.5 GB");
-    addModel("solar", "Solar", "10.7B", "6.1 GB");
+    if (getCount(TABLE_MODEL, "name") == 0) {
+        addModel("moondream", "Moondream 2", "1.4B", "829 MB");
+        addModel("llama3.2", "Llama 3.2", "3B", "2.0 GB");
+        addModel("llama3.2:1b", "Llama 3.2", "1B", "1.3 GB");
+        addModel("llama3.2-vision", "Llama 3.2 Vision", "11B", "7.9 GB");
+        addModel("llama3.2-vision:90b", "Llama 3.2 Vision", "90B", "55 GB");
+        addModel("llama3.1", "Llama 3.1", "8B", "4.7 GB");
+        addModel("llama3.1:70b", "Llama 3.1", "70B", "40 GB");
+        addModel("llama3.1:405b", "Llama 3.1", "405B", "231 GB");
+        addModel("phi3", "Phi 3 Mini", "3.8B", "2.3 GB");
+        addModel("phi3:medium", "Phi 3 Medium", "14B", "7.9 GB");
+        addModel("gemma2:2b", "Gemma 2", "2B", "1.6 GB");
+        addModel("gemma2", "Gemma 2", "9B", "5.5 GB");
+        addModel("gemma2:27b", "Gemma 2", "27B", "16 GB");
+        addModel("mistral", "Mistral", "7B", "4.1 GB");
+        addModel("neural-chat", "Neural Chat", "7B", "4.1 GB");
+        addModel("starling-lm", "Starling", "7B", "4.1 GB");
+        addModel("codellama", "Code Llama", "7B", "3.8 GB");
+        addModel("llama2-uncensored", "Llama 2 Uncensored", "7B", "3.8 GB");
+        addModel("llava", "LLaVA", "7B", "4.5 GB");
+        addModel("solar", "Solar", "10.7B", "6.1 GB");
+    }
 }
 
 void DatabaseComponent::deleteSqliteDatabase() {
@@ -124,13 +126,13 @@ void DatabaseComponent::updateSetting(const QString &key, const QString &value) 
     emit updateSettingResult(result, convertJsonToString(data));
 }
 
-int DatabaseComponent::getCount(QString tableName) {
-    if (tableName.isEmpty() || tableName.isNull()) {
+int DatabaseComponent::getCount(QString tableName, QString fieldName) {
+    if (tableName.isEmpty() || tableName.isNull() || fieldName.isEmpty() || fieldName.isNull()) {
         return -1;
     }
 
     QSqlQuery query;
-    query.prepare("SELECT COUNT(id) AS count FROM " + tableName);
+    query.prepare("SELECT COUNT(" + fieldName + ") AS count FROM " + tableName);
 
     bool result = query.exec();
     if (!result) {

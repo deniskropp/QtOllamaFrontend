@@ -412,12 +412,12 @@ ApplicationWindow {
                 text: qsTr("&Image")
                 onTriggered: dialogImage.open()
             }
-            DialogModelOptions {
-                id: dialogModelOptions
-            }
+            //DialogModelOptions {
+            //    id: dialogModelOptions
+            //}
             Action {
                 text: qsTr("&Export")
-                onTriggered: dialogModelOptions.open()
+                //onTriggered: dialogModelOptions.open()
             }
             MenuSeparator { }
             Action {
@@ -460,6 +460,13 @@ ApplicationWindow {
             Action {
                 text: qsTr("&Add")
                 onTriggered: dialogAddModel.open()
+            }
+            DialogModelOptions {
+                id: dialogModelOptions
+            }
+            Action {
+                text: qsTr("&Options")
+                onTriggered: dialogModelOptions.open()
             }
         }
         Menu {

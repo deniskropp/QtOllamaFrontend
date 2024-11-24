@@ -28,6 +28,10 @@ qt_add_qml_module(appQtOllamaFrontend
         qml/CustomLabel.qml
         qml/CustomTextArea.qml
         qml/CustomTextField.qml
+        qml/CustomCheckBoxTextField.qml
+        qml/CustomCheckBoxTextFieldInteger.qml
+        qml/CustomCheckBoxTextFieldDouble.qml
+        qml/CustomCheckBoxTextFieldBoolean.qml
         qml/DialogAbout.qml
         qml/DialogService.qml
         qml/DialogAddModel.qml
