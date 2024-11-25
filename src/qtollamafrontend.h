@@ -1,17 +1,21 @@
 #ifndef QTOLLAMAFRONTEND_H
 #define QTOLLAMAFRONTEND_H
 
+#include <QGuiApplication>
 #include <QObject>
 #include <QDebug>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QTcpSocket>
 #include <QTextToSpeech>
+#include <QClipboard>
 #include <QDomDocument>
 #include <QMimeDatabase>
 #include <QImage>
 #include <QBuffer>
 #include "databasecomponent.h"
+
+extern QGuiApplication *appReference;
 
 class QtOllamaFrontend : public QObject
 {
@@ -93,6 +97,7 @@ class QtOllamaFrontend : public QObject
 
     DatabaseComponent *m_databaseComponent = nullptr;
     QNetworkAccessManager *m_networkAccessManager = nullptr;
+    QClipboard *m_clipboard = nullptr;
 
     // chat history
     QJsonArray m_messages;
@@ -228,6 +233,7 @@ class QtOllamaFrontend : public QObject
     QString convertJsonToString(const QJsonObject &data);
     QString convertJsonToString(const QJsonArray &data);
     static QByteArray convertToBytes(const QJsonObject &jsonObject);
+    static QByteArray convertToBytes(const QJsonArray &jsonArray);
     static QJsonObject convertToJsonObject(const QString &jsonString);
     static QJsonArray convertToJsonArray(const QString &jsonString);
     QByteArray getImageBytes(const QString filePath);
@@ -332,26 +338,8 @@ signals:
     void receivedPullModelProgress(QString modelName, QString status, qint64 bytesReceived, qint64 bytesTotal);
     void receivedPullModel(const QVariant result);
     void receivedDeleteModel(const QVariant result);
-public slots:
-    bool addModelToDb(QString name, QString description, QString parameterSize, QString size);
-    QVariantList getModelsFromDb();
-    void loadModel(QString modelName);
-    void unloadModel(QString modelName);
-    void getLoadedModels();
-    void getModels();
-    void pullModel(QString modelName);
-    void deleteModel(QString modelName);
-    void startNewChat();
-    void sendMessage(QString content, QString jsonImageFilePaths);
-    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
-    void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
-    QString getSetting(QString key);
-    QString getSettingsKey(int key);
-    QString getDefaultSetting(int key);
-    void resetSetting(int key);
-    void resetSettings(QVariantList keys);
 public:
-    // enum
+    // enums
     enum Settings {
         // api
         ApiHost,
@@ -428,7 +416,38 @@ public:
         NumThreadApplied
     };
     Q_ENUM(Settings)
-
+    enum ExportFormat {
+        ExportFormatJson,
+        ExportFormatPlainText
+    };
+    Q_ENUM(ExportFormat)
+    enum ExportMessageSelection {
+        ExportMessageSelectionAllMessages,
+        ExportMessageSelectionOnlyUserMessages,
+        ExportMessageSelectionOnlyAssistantMessages
+    };
+    Q_ENUM(ExportMessageSelection)
+public slots:
+    bool addModelToDb(QString name, QString description, QString parameterSize, QString size);
+    QVariantList getModelsFromDb();
+    void loadModel(QString modelName);
+    void unloadModel(QString modelName);
+    void getLoadedModels();
+    void getModels();
+    void pullModel(QString modelName);
+    void deleteModel(QString modelName);
+    void startNewChat();
+    void exportChatMessages(QString targetFilePath, ExportFormat format, ExportMessageSelection messageSelection);
+    void sendMessage(QString content, QString jsonImageFilePaths);
+    void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+    void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
+    QString getSetting(QString key);
+    QString getSettingsKey(int key);
+    QString getDefaultSetting(int key);
+    void resetSetting(int key);
+    void resetSettings(QVariantList keys);
+    void copyTextToClipboard(QString text);
+public:
     // loading
     bool loading();
     void setLoading(const bool &loading);

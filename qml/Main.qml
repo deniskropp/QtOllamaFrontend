@@ -205,6 +205,12 @@ ApplicationWindow {
                                             textToSpeech.say(model.content);
                                         }
                                     }
+                                    CustomButton {
+                                        text: qsTr("Copy To Clipboard")
+                                        onClicked: {
+                                            qtOllamaFrontend.copyTextToClipboard(model.content);
+                                        }
+                                    }
                                 }
                                 CustomTextArea {
                                     Layout.fillWidth: true
@@ -314,6 +320,7 @@ ApplicationWindow {
                 font.pointSize: 12
                 placeholderText: qsTr("Message Text")
                 visible: !checkBoxTextMessageMultiline.checked
+                onTextChanged: textArea.text = text
                 onAccepted: {
                     const messageContent = textField.text.trim();
 
@@ -350,6 +357,7 @@ ApplicationWindow {
                     Layout.rightMargin: 10
                     font.pointSize: 12
                     placeholderText: qsTr("Message Text")
+                    onTextChanged: textField.text = text
                 }
                 CustomButton {
                     Layout.topMargin: 10
@@ -409,20 +417,20 @@ ApplicationWindow {
             }
             Action {
                 id: actionImage
-                text: qsTr("&Image")
+                text: qsTr("&Message with Image")
                 onTriggered: dialogImage.open()
             }
-            //DialogModelOptions {
-            //    id: dialogModelOptions
-            //}
+            DialogExportMessages {
+                id: dialogExportMessages
+            }
             Action {
-                text: qsTr("&Export")
-                //onTriggered: dialogModelOptions.open()
+                text: qsTr("&Export Chat Messages")
+                onTriggered: dialogExportMessages.open()
             }
             MenuSeparator { }
             Action {
                 id: actionTextMessageMultiline
-                text: qsTr("&Multiline")
+                text: qsTr("&Multiline Text Field")
                 checkable: true
                 checked: checkBoxTextMessageMultiline.checked
                 onTriggered: {
@@ -441,14 +449,14 @@ ApplicationWindow {
                 id: dialogSelectModel
             }
             Action {
-                text: qsTr("&Select")
+                text: qsTr("&Select Model")
                 onTriggered: dialogSelectModel.open()
             }
             DialogPullModel {
                 id: dialogPullModel
             }
             Action {
-                text: qsTr("&Pull")
+                text: qsTr("&Pull Model")
                 onTriggered: dialogPullModel.open()
             }
             DialogAddModel {
@@ -458,14 +466,14 @@ ApplicationWindow {
                 }
             }
             Action {
-                text: qsTr("&Add")
+                text: qsTr("&Add Model")
                 onTriggered: dialogAddModel.open()
             }
             DialogModelOptions {
                 id: dialogModelOptions
             }
             Action {
-                text: qsTr("&Options")
+                text: qsTr("Model &Options")
                 onTriggered: dialogModelOptions.open()
             }
         }
@@ -508,7 +516,7 @@ ApplicationWindow {
             }
             Action {
                 id: actionOutputTts
-                text: qsTr("Output &TTS")
+                text: qsTr("&Output TTS")
                 checkable: true
                 checked: true
                 onTriggered: {

@@ -41,6 +41,7 @@ qt_add_qml_module(appQtOllamaFrontend
         qml/DialogModelOptions.qml
         qml/DialogImage.qml
         qml/DialogTextToSpeech.qml
+        qml/DialogExportMessages.qml
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

@@ -7,6 +7,8 @@
 #include <QIcon>
 #include "qtollamafrontend.h"
 
+QGuiApplication *appReference;
+
 int main(int argc, char *argv[])
 {
     // clean / sharp text
@@ -14,6 +16,7 @@ int main(int argc, char *argv[])
     //QCoreApplication::setAttribute(Qt::AA_UseSoftwareOpenGL);
 
     QGuiApplication app(argc, argv);
+    appReference = &app;
 
     app.setWindowIcon(QIcon(":images/earth.svg"));
 

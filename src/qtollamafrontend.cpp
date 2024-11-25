@@ -3,6 +3,7 @@
 QtOllamaFrontend::QtOllamaFrontend(QObject* parent) : QObject(parent) {
     m_databaseComponent = new DatabaseComponent(this);
     m_networkAccessManager = new QNetworkAccessManager(this);
+    m_clipboard = appReference->clipboard();
 
     // update setting
     connect(this, &QtOllamaFrontend::updateSetting, this, [=](QString key, QString value) {
@@ -189,6 +190,12 @@ QString QtOllamaFrontend::convertJsonToString(const QJsonArray &data) {
 
 QByteArray QtOllamaFrontend::convertToBytes(const QJsonObject &jsonObject) {
     QJsonDocument doc(jsonObject);
+    QByteArray jsonBytes = doc.toJson(QJsonDocument::Indented);
+    return jsonBytes;
+}
+
+QByteArray QtOllamaFrontend::convertToBytes(const QJsonArray &jsonArray) {
+    QJsonDocument doc(jsonArray);
     QByteArray jsonBytes = doc.toJson(QJsonDocument::Indented);
     return jsonBytes;
 }
@@ -1435,6 +1442,11 @@ void QtOllamaFrontend::resetSettings(QVariantList keys) {
     }
 }
 
+void QtOllamaFrontend::copyTextToClipboard(QString text) {
+    qDebug() << "copy to cliepboard:" << text;
+    m_clipboard->setText(text);
+}
+
 QJsonObject QtOllamaFrontend::getSelectedOptions() {
     QJsonObject options;
 
@@ -1641,6 +1653,50 @@ void QtOllamaFrontend::sendMessage(QString content, QString jsonImageFilePaths) 
 void QtOllamaFrontend::startNewChat() {
     m_messages = QJsonArray();
     emit receivedNewChatStarted();
+}
+
+void QtOllamaFrontend::exportChatMessages(QString targetFilePath, ExportFormat format, ExportMessageSelection messageSelection) {
+    qDebug() << targetFilePath << format << messageSelection;
+
+    // remove "file:///" from file path
+    if (targetFilePath.startsWith("file:///")) {
+        for (int j = 0; j < QString("file:///").size(); j++) {
+            targetFilePath.removeFirst();
+        }
+    }
+
+    QJsonArray exportMessages;
+
+    for (QJsonValue jsonValue : m_messages) {
+        QJsonObject message = jsonValue.toObject();
+
+        if (messageSelection == ExportMessageSelectionAllMessages
+         || ((messageSelection == ExportMessageSelectionOnlyUserMessages) && (message.value("role").toString() == "user"))
+         || ((messageSelection == ExportMessageSelectionOnlyAssistantMessages) && (message.value("role").toString() == "assistant"))) {
+            exportMessages.append(QJsonObject(message));
+        }
+    }
+
+    // save to file
+    QString fileContent = "";
+    if (format == ExportFormatJson) {
+        fileContent = convertToBytes(exportMessages);
+    } else if (format == ExportFormatPlainText) {
+        for (QJsonValue jsonValue : exportMessages) {
+            QJsonObject message = jsonValue.toObject();
+            fileContent += message.value("role").toString() + ":\n" + message.value("content").toString() + "\n\n--------------------------------------------------\n\n";
+        }
+    }
+
+    QFile file(targetFilePath);
+    if (!file.open(QFile::WriteOnly)) {
+        qDebug() << "cannot write to file" << targetFilePath;
+        return;
+    }
+
+    file.write(fileContent.toUtf8());
+
+    file.close();
 }
 
 void QtOllamaFrontend::getModels() {
