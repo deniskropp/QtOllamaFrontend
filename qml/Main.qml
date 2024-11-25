@@ -40,48 +40,39 @@ ApplicationWindow {
     TextToSpeech {
         id: textToSpeech
         Component.onCompleted: {
-            engine: {
-                if (qtOllamaFrontend.ttsEngine != "") {
-                    var engines = availableEngines();
-                    var index = engines.indexOf(qtOllamaFrontend.ttsEngine);
+            if (qtOllamaFrontend.ttsEngine != "") {
+                var engines = availableEngines();
+                var index = engines.indexOf(qtOllamaFrontend.ttsEngine);
 
-                    if (index >= 0) {
-                        console.log("selected engine:", availableEngines()[index]);
-                        return availableEngines()[index];
-                    }
+                if (index >= 0) {
+                    console.log("selected engine:", availableEngines()[index]);
+                    engine = availableEngines()[index];
                 }
-
-                return engine;
             }
-            locale: {
-                if (qtOllamaFrontend.ttsLocale != "") {
-                    var locales = availableLocales().map((locale) => locale.nativeLanguageName);
-                    var index = locales.indexOf(qtOllamaFrontend.ttsLocale);
 
-                    if (index >= 0) {
-                        console.log("selected locale:", availableLocales()[index].nativeLanguageName);
-                        return availableLocales()[index];
-                    }
+            if (qtOllamaFrontend.ttsLocale != "") {
+                var locales = availableLocales().map((locale) => locale.nativeLanguageName);
+                var index = locales.indexOf(qtOllamaFrontend.ttsLocale);
+
+                if (index >= 0) {
+                    console.log("selected locale:", availableLocales()[index].nativeLanguageName);
+                    locale = availableLocales()[index];
                 }
-
-                return locale;
             }
-            voice: {
-                if (qtOllamaFrontend.ttsVoice != "") {
-                    var voices = availableVoices().map((voice) => voice.name);
-                    var index = voices.indexOf(qtOllamaFrontend.ttsVoice);
 
-                    if (index >= 0) {
-                        console.log("selected voice:", availableVoices()[index].name);
-                        return availableVoices()[index];
-                    }
+            if (qtOllamaFrontend.ttsVoice != "") {
+                var voices = availableVoices().map((voice) => voice.name);
+                var index = voices.indexOf(qtOllamaFrontend.ttsVoice);
+
+                if (index >= 0) {
+                    console.log("selected voice:", availableVoices()[index].name);
+                    voice = availableVoices()[index];
                 }
-
-                return voice;
             }
-            rate: qtOllamaFrontend.ttsRate;
-            pitch: qtOllamaFrontend.ttsPitch;
-            volume: qtOllamaFrontend.ttsVolume;
+
+            rate = qtOllamaFrontend.ttsRate;
+            pitch = qtOllamaFrontend.ttsPitch;
+            volume = qtOllamaFrontend.ttsVolume;
         }
     }
 
@@ -395,10 +386,15 @@ ApplicationWindow {
     menuBar: MenuBar {
         Menu {
             title: qsTr("&Chat")
+            DialogNewChat {
+                id: dialogNewChat
+                onAccepted: qtOllamaFrontend.startNewChat()
+            }
             Action {
                 id: actionNewChat
+                shortcut: "Ctrl+N"
                 text: qsTr("&New Chat")
-                onTriggered: qtOllamaFrontend.startNewChat()
+                onTriggered: dialogNewChat.open()
             }
             MenuSeparator { }
             DialogImage {
@@ -424,6 +420,7 @@ ApplicationWindow {
                 id: dialogExportMessages
             }
             Action {
+                shortcut: "Ctrl+S"
                 text: qsTr("&Export Chat Messages")
                 onTriggered: dialogExportMessages.open()
             }
@@ -449,6 +446,7 @@ ApplicationWindow {
                 id: dialogSelectModel
             }
             Action {
+                shortcut: "Ctrl+M"
                 text: qsTr("&Select Model")
                 onTriggered: dialogSelectModel.open()
             }
@@ -498,6 +496,7 @@ ApplicationWindow {
                 textToSpeech: textToSpeech
             }
             Action {
+                shortcut: "Ctrl+T"
                 text: qsTr("&Text to Speech")
                 onTriggered: dialogTextToSpeech.open()
             }
