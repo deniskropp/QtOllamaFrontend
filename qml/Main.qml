@@ -577,6 +577,13 @@ ApplicationWindow {
                     dialogTextToSpeech.open();
                 }
             }
+            CustomButton {
+                text: qsTr("Stop Playback")
+                onClicked: {
+                    // workaround - stop() method causes crash
+                    textToSpeech.say(" ");
+                }
+            }
             Item {
                 Layout.fillWidth: true
             }
