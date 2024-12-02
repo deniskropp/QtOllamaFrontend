@@ -91,7 +91,8 @@ ApplicationWindow {
                 listViewMessages.addMessage({
                     "role": json.message.role,
                     "content": json.message.content,
-                    "imageUrl": ""
+                    "imageUrl": "",
+                    "done": json.message.done
                 });
             }
 
@@ -157,11 +158,35 @@ ApplicationWindow {
                         }
                     }
                     function addMessage(message) {
-                        listModelMessages.append({
-                            "role": message.role,
-                            "content": message.content,
-                            "imageUrl": message.imageUrl != "" ? message.imageUrl : ""
-                        });
+                        if (message.done) {
+                            // add new message list item
+                            listModelMessages.append({
+                                "role": message.role,
+                                "content": message.content,
+                                "imageUrl": message.imageUrl != "" ? message.imageUrl : "",
+                                "done": message.done
+                            });
+                        } else {
+                            // stream
+                            var index = listModelMessages.count - 1;
+                            var lastMessage = listModelMessages.get(index);
+
+                            if (lastMessage.done) {
+                                // add new message list item
+                                listModelMessages.append({
+                                    "role": message.role,
+                                    "content": message.content,
+                                    "imageUrl": message.imageUrl != "" ? message.imageUrl : "",
+                                    "done": message.done
+                                });
+                            } else {
+                                // update last message list item
+                                listModelMessages.set(index, {
+                                    "content": message.content,
+                                    "done": message.done
+                                });
+                            }
+                        }
 
                         listViewMessages.positionViewAtEnd();
                     }
@@ -170,6 +195,7 @@ ApplicationWindow {
                     }
                     delegate: ItemDelegate {
                         id: item
+                        property bool done: model.done
                         width: listViewMessages.width
                         height: itemDelegateRow.height
                         background: Rectangle {
@@ -329,7 +355,8 @@ ApplicationWindow {
                     listViewMessages.addMessage({
                         "role": "user",
                         "content": messageContent,
-                        "imageUrl": ""
+                        "imageUrl": "",
+                        "done": true
                     });
 
                     qtOllamaFrontend.sendMessage(messageContent, "");
@@ -373,7 +400,8 @@ ApplicationWindow {
                         listViewMessages.addMessage({
                             "role": "user",
                             "content": messageContent,
-                            "imageUrl": ""
+                            "imageUrl": "",
+                            "done": true
                         });
 
                         qtOllamaFrontend.sendMessage(messageContent, "");
@@ -405,7 +433,8 @@ ApplicationWindow {
                     listViewMessages.addMessage({
                         "role": "user",
                         "content": messageText,
-                        "imageUrl": images.length > 0 ? jsonImages[0] : ""
+                        "imageUrl": images.length > 0 ? jsonImages[0] : "",
+                        "done": true
                     });
 
                     qtOllamaFrontend.sendMessage(messageText, images);
@@ -473,6 +502,16 @@ ApplicationWindow {
             Action {
                 text: qsTr("Model &Options")
                 onTriggered: dialogModelOptions.open()
+            }
+            MenuSeparator { }
+            Action {
+                id: actionStream
+                text: qsTr("S&tream Responses")
+                checkable: true
+                checked: checkBoxStream.checked
+                onTriggered: {
+                    checkBoxStream.checked = checked;
+                }
             }
         }
         Menu {
@@ -547,16 +586,30 @@ ApplicationWindow {
                 Layout.bottomMargin: 10
                 running: qtOllamaFrontend.loading
             }
-            CheckBox {
-                id: checkBoxTextMessageMultiline
-                Layout.topMargin: 10
-                Layout.bottomMargin: 10
-                Layout.leftMargin: 10
-                Layout.rightMargin: 10
-                text: qsTr("Multiline")
-                checked: qtOllamaFrontend.textMessageMultiline
-                onClicked: {
-                    qtOllamaFrontend.textMessageMultiline = checked;
+            Column {
+                CheckBox {
+                    id: checkBoxTextMessageMultiline
+                    Layout.topMargin: 10
+                    Layout.bottomMargin: 10
+                    Layout.leftMargin: 10
+                    Layout.rightMargin: 10
+                    text: qsTr("Multiline")
+                    checked: qtOllamaFrontend.textMessageMultiline
+                    onClicked: {
+                        qtOllamaFrontend.textMessageMultiline = checked;
+                    }
+                }
+                CheckBox {
+                    id: checkBoxStream
+                    Layout.topMargin: 10
+                    Layout.bottomMargin: 10
+                    Layout.leftMargin: 10
+                    Layout.rightMargin: 10
+                    text: qsTr("Stream")
+                    checked: qtOllamaFrontend.stream
+                    onClicked: {
+                        qtOllamaFrontend.stream = checked;
+                    }
                 }
             }
             CustomButton {

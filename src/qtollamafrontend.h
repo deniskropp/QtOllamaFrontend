@@ -25,6 +25,7 @@ class QtOllamaFrontend : public QObject
     Q_PROPERTY(QString host READ host WRITE setHost NOTIFY hostChanged)
     Q_PROPERTY(int port READ port WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(QString modelName READ modelName WRITE setModelName NOTIFY modelNameChanged)
+    Q_PROPERTY(bool stream READ stream WRITE setStream NOTIFY streamChanged)
     // settings
     Q_PROPERTY(bool showLog READ showLog WRITE setShowLog NOTIFY showLogChanged)
     Q_PROPERTY(bool outputTts READ outputTts WRITE setOutputTts NOTIFY outputTtsChanged)
@@ -106,13 +107,14 @@ class QtOllamaFrontend : public QObject
     // api
     const QString API_HOST = "127.0.0.1";
     const int API_PORT = 11434;
+    const QString API_MODEL_NAME = "llama3.2:latest";
+    const bool API_STREAM = false;
     const QString API_CHAT_URI = "/api/chat";
     const QString API_TAGS_URI = "/api/tags";
     const QString API_GENERATE_URI = "/api/generate";
     const QString API_PS_URI = "/api/ps";
     const QString API_PULL_URI = "/api/pull";
     const QString API_DELETE_URI = "/api/delete";
-    const QString API_MODEL_NAME = "llama3.2:latest";
     // settings
     const bool SHOW_LOG = true;
     const bool OUTPUT_TTS = true;
@@ -157,6 +159,7 @@ class QtOllamaFrontend : public QObject
     QString m_host = "127.0.0.1";
     int m_port = 11434;
     QString m_modelName = "llama3.2:latest";
+    bool m_stream = false;
     // settings
     bool m_showLog = false;
     bool m_outputTts = true;
@@ -230,10 +233,10 @@ class QtOllamaFrontend : public QObject
     QString createHttpPostRequest(const QString &apiUri, const QString &jsonString);
     QString createHttpDeleteRequest(const QString &apiUri, const QString &jsonString);
     QNetworkRequest createNetworkRequest(const QUrl &url, const QByteArray &bytes = QByteArray());
-    QString convertJsonToString(const QJsonObject &data);
-    QString convertJsonToString(const QJsonArray &data);
-    static QByteArray convertToBytes(const QJsonObject &jsonObject);
-    static QByteArray convertToBytes(const QJsonArray &jsonArray);
+    QString convertJsonToString(const QJsonObject &data, bool indented = true);
+    QString convertJsonToString(const QJsonArray &data, bool indented = true);
+    static QByteArray convertToBytes(const QJsonObject &jsonObject, bool indented = true);
+    static QByteArray convertToBytes(const QJsonArray &jsonArray, bool indented = true);
     static QJsonObject convertToJsonObject(const QString &jsonString);
     static QJsonArray convertToJsonArray(const QString &jsonString);
     QByteArray getImageBytes(const QString filePath);
@@ -253,6 +256,7 @@ signals:
     void hostChanged();
     void portChanged();
     void modelNameChanged();
+    void streamChanged();
     // settings
     void showLogChanged();
     void outputTtsChanged();
@@ -345,6 +349,7 @@ public:
         ApiHost,
         ApiPort,
         ApiModelName,
+        ApiStream,
         // settings
         ScaledImageWidth,
         ScaledImageHeight,
@@ -462,6 +467,9 @@ public:
     // model name
     QString modelName();
     void setModelName(const QString &modelName);
+    // stream
+    bool stream();
+    void setStream(const bool &stream);
 
     // settings
     // show log
