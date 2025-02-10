@@ -32,6 +32,8 @@ qt_add_qml_module(appQtOllamaFrontend
     VERSION 1.0
     QML_FILES
         qml/Main.qml
+        qml/MainMinimal.qml
+        qml/MainMinimalKirigami.qml
         qml/CustomButton.qml
         qml/CustomComboBox.qml
         qml/CustomLabel.qml

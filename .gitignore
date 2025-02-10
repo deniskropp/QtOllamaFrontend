@@ -1,2 +1,5 @@
 build/
 CMakeLists.txt.user
+.cache/
+.vscode/
+_NEW/
