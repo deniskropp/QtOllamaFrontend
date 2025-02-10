@@ -18,6 +18,15 @@ qt_add_executable(appQtOllamaFrontend
     resources/resources.qrc
 )
 
+qt_add_executable(appQtOllamaCLI
+    src/cli.cpp
+    src/databasecomponent.h
+    src/databasecomponent.cpp
+    src/qtollamafrontend.h
+    src/qtollamafrontend.cpp
+    resources/resources.qrc
+)
+
 qt_add_qml_module(appQtOllamaFrontend
     URI QtOllamaFrontend
     VERSION 1.0
@@ -63,8 +72,20 @@ target_link_libraries(appQtOllamaFrontend
     PRIVATE Qt6::TextToSpeech
 )
 
+target_link_libraries(appQtOllamaCLI
+    PRIVATE Qt6::Quick
+    PRIVATE Qt6::Sql
+    PRIVATE Qt6::Xml
+    PRIVATE Qt6::TextToSpeech
+)
+
 include(GNUInstallDirs)
 install(TARGETS appQtOllamaFrontend
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+install(TARGETS appQtOllamaCLI
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
