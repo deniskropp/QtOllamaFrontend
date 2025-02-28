@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
     engine.loadFromModule("QtOllamaFrontend", "Main");
+    //engine.loadFromModule("QtOllamaFrontend", "MainMinimalKirigami");
 
     return app.exec();
 }

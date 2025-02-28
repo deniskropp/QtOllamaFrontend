@@ -1,6 +1,6 @@
 #include "qtollamafrontend.h"
-#include <QCoreApplication>
 #include <QCommandLineParser>
+#include <QCoreApplication>
 #include <QDebug>
 #include <iostream>
 
@@ -23,21 +23,24 @@ void setupCliParser(QCommandLineParser &parser, QtOllamaFrontend &frontend) {
     parser.addOption(streamOption);
 
     // --- Settings ---
-     QCommandLineOption showLogOption("show-log", "Show log output.", "show-log", frontend.showLog() ? "true" : "false");
+    QCommandLineOption showLogOption("show-log", "Show log output.", "show-log", frontend.showLog() ? "true" : "false");
     parser.addOption(showLogOption);
-    
-    QCommandLineOption outputTtsOption("output-tts", "Enable text-to-speech output.", "output-tts", frontend.outputTts() ? "true" : "false");
+
+    QCommandLineOption outputTtsOption("output-tts", "Enable text-to-speech output.", "output-tts",
+                                       frontend.outputTts() ? "true" : "false");
     parser.addOption(outputTtsOption);
 
-    QCommandLineOption textMessageMultilineOption("multiline", "Enable multiline text messages.", "multiline", frontend.textMessageMultiline() ? "true" : "false");
+    QCommandLineOption textMessageMultilineOption("multiline", "Enable multiline text messages.", "multiline",
+                                                  frontend.textMessageMultiline() ? "true" : "false");
     parser.addOption(textMessageMultilineOption);
 
-    QCommandLineOption scaledImageWidthOption("image-width", "Scaled image width.", "image-width", QString::number(frontend.scaledImageWidth()));
+    QCommandLineOption scaledImageWidthOption("image-width", "Scaled image width.", "image-width",
+                                              QString::number(frontend.scaledImageWidth()));
     parser.addOption(scaledImageWidthOption);
 
-    QCommandLineOption scaledImageHeightOption("image-height", "Scaled image height.", "image-height", QString::number(frontend.scaledImageHeight()));
+    QCommandLineOption scaledImageHeightOption("image-height", "Scaled image height.", "image-height",
+                                               QString::number(frontend.scaledImageHeight()));
     parser.addOption(scaledImageHeightOption);
-
 
     // --- Model Options ---
     QCommandLineOption seedOption("seed", "Random seed.", "seed", QString::number(frontend.seed()));
@@ -45,8 +48,9 @@ void setupCliParser(QCommandLineParser &parser, QtOllamaFrontend &frontend) {
 
     QCommandLineOption numKeepOption("num-keep", "Number of tokens to keep.", "num-keep", QString::number(frontend.numKeep()));
     parser.addOption(numKeepOption);
-    
-    QCommandLineOption numPredictOption("num-predict", "Number of tokens to predict.", "num-predict", QString::number(frontend.numPredict()));
+
+    QCommandLineOption numPredictOption("num-predict", "Number of tokens to predict.", "num-predict",
+                                        QString::number(frontend.numPredict()));
     parser.addOption(numPredictOption);
 
     QCommandLineOption topKOption("top-k", "Top-k sampling.", "top-k", QString::number(frontend.topK()));
@@ -64,31 +68,36 @@ void setupCliParser(QCommandLineParser &parser, QtOllamaFrontend &frontend) {
     QCommandLineOption typicalPOption("typical-p", "Typical-p sampling.", "typical-p", QString::number(frontend.typicalP()));
     parser.addOption(typicalPOption);
 
-    QCommandLineOption repeatLastNOption("repeat-last-n", "Repeat last N tokens.", "repeat-last-n", QString::number(frontend.repeatLastN()));
+    QCommandLineOption repeatLastNOption("repeat-last-n", "Repeat last N tokens.", "repeat-last-n",
+                                         QString::number(frontend.repeatLastN()));
     parser.addOption(repeatLastNOption);
 
     QCommandLineOption temperatureOption("temperature", "Temperature.", "temperature", QString::number(frontend.temperature()));
     parser.addOption(temperatureOption);
-    
-    QCommandLineOption repeatPenaltyOption("repeat-penalty", "Repeat penalty.", "repeat-penalty", QString::number(frontend.repeatPenalty()));
+
+    QCommandLineOption repeatPenaltyOption("repeat-penalty", "Repeat penalty.", "repeat-penalty",
+                                           QString::number(frontend.repeatPenalty()));
     parser.addOption(repeatPenaltyOption);
 
-    QCommandLineOption presencePenaltyOption("presence-penalty", "Presence penalty.", "presence-penalty", QString::number(frontend.presencePenalty()));
+    QCommandLineOption presencePenaltyOption("presence-penalty", "Presence penalty.", "presence-penalty",
+                                             QString::number(frontend.presencePenalty()));
     parser.addOption(presencePenaltyOption);
 
-    QCommandLineOption frequencyPenaltyOption("frequency-penalty", "Frequency penalty.", "frequency-penalty", QString::number(frontend.frequencyPenalty()));
+    QCommandLineOption frequencyPenaltyOption("frequency-penalty", "Frequency penalty.", "frequency-penalty",
+                                              QString::number(frontend.frequencyPenalty()));
     parser.addOption(frequencyPenaltyOption);
 
     QCommandLineOption mirostatOption("mirostat", "Mirostat sampling.", "mirostat", QString::number(frontend.mirostat()));
     parser.addOption(mirostatOption);
-    
+
     QCommandLineOption mirostatTauOption("mirostat-tau", "Mirostat tau.", "mirostat-tau", QString::number(frontend.mirostatTau()));
     parser.addOption(mirostatTauOption);
 
     QCommandLineOption mirostatEtaOption("mirostat-eta", "Mirostat eta.", "mirostat-eta", QString::number(frontend.mirostatEta()));
     parser.addOption(mirostatEtaOption);
 
-    QCommandLineOption penalizeNewlineOption("penalize-newline", "Penalize newline.", "penalize-newline", frontend.penalizeNewline() ? "true" : "false");
+    QCommandLineOption penalizeNewlineOption("penalize-newline", "Penalize newline.", "penalize-newline",
+                                             frontend.penalizeNewline() ? "true" : "false");
     parser.addOption(penalizeNewlineOption);
 
     QCommandLineOption stopOption("stop", "Stop sequence.", "stop", frontend.stop());
@@ -102,7 +111,7 @@ void setupCliParser(QCommandLineParser &parser, QtOllamaFrontend &frontend) {
 
     QCommandLineOption numBatchOption("num-batch", "Batch size.", "num-batch", QString::number(frontend.numBatch()));
     parser.addOption(numBatchOption);
-    
+
     QCommandLineOption numGpuOption("num-gpu", "Number of GPUs.", "num-gpu", QString::number(frontend.numGpu()));
     parser.addOption(numGpuOption);
 
@@ -117,21 +126,23 @@ void setupCliParser(QCommandLineParser &parser, QtOllamaFrontend &frontend) {
 
     QCommandLineOption useMmapOption("use-mmap", "Use mmap.", "use-mmap", frontend.useMmap() ? "true" : "false");
     parser.addOption(useMmapOption);
-    
+
     QCommandLineOption useMlockOption("use-mlock", "Use mlock.", "use-mlock", frontend.useMlock() ? "true" : "false");
     parser.addOption(useMlockOption);
 
     QCommandLineOption numThreadOption("num-thread", "Number of threads.", "num-thread", QString::number(frontend.numThread()));
     parser.addOption(numThreadOption);
 
-
     // --- Actions ---
     QCommandLineOption sendOption("send", "Send a message to the model.", "message");
     parser.addOption(sendOption);
 
+    QCommandLineOption sendMessagesOption("send-messages", "Send a JSON array of messages to the model.", "messages");
+    parser.addOption(sendMessagesOption);
+
     QCommandLineOption imageFileOption("image", "Path to an image file to include with the message.", "path");
     parser.addOption(imageFileOption);
-    
+
     QCommandLineOption listModelsOption("list-models", "List available models.");
     parser.addOption(listModelsOption);
 
@@ -140,7 +151,7 @@ void setupCliParser(QCommandLineParser &parser, QtOllamaFrontend &frontend) {
 
     QCommandLineOption deleteModelOption("delete", "Delete a model.", "model-name");
     parser.addOption(deleteModelOption);
-    
+
     QCommandLineOption startChat("start-chat", "Starts new chat.");
     parser.addOption(startChat);
 
@@ -148,15 +159,16 @@ void setupCliParser(QCommandLineParser &parser, QtOllamaFrontend &frontend) {
     parser.addOption(getModelsDb);
 
     QCommandLineOption exportChatOption("export-chat", "Export the chat messages.");
-        parser.addOption(exportChatOption);
+    parser.addOption(exportChatOption);
 
     QCommandLineOption exportFilePathOption("export-file", "File path for export.", "filepath");
-        parser.addOption(exportFilePathOption);
+    parser.addOption(exportFilePathOption);
 
     QCommandLineOption exportFormatOption("export-format", "Export format (json or plaintext).", "format", "json");
-        parser.addOption(exportFormatOption);
+    parser.addOption(exportFormatOption);
 
-    QCommandLineOption exportMessageSelectionOption("export-selection", "Message selection for export (all, user, or assistant).", "selection", "all");
+    QCommandLineOption exportMessageSelectionOption("export-selection", "Message selection for export (all, user, or assistant).",
+                                                    "selection", "all");
     parser.addOption(exportMessageSelectionOption);
 }
 
@@ -176,11 +188,11 @@ void processCliOptions(const QCommandLineParser &parser, QtOllamaFrontend &front
     }
 
     // --- Settings ---
-    if(parser.isSet("show-log")) {
+    if (parser.isSet("show-log")) {
         frontend.setShowLog(parser.value("show-log") == "true");
     }
     if (parser.isSet("output-tts")) {
-       frontend.setOutputTts(parser.value("output-tts") == "true");
+        frontend.setOutputTts(parser.value("output-tts") == "true");
     }
     if (parser.isSet("multiline")) {
         frontend.setTextMessageMultiline(parser.value("multiline") == "true");
@@ -196,22 +208,22 @@ void processCliOptions(const QCommandLineParser &parser, QtOllamaFrontend &front
     if (parser.isSet("seed")) {
         frontend.setSeed(parser.value("seed").toInt());
     }
-    if(parser.isSet("num-keep")){
+    if (parser.isSet("num-keep")) {
         frontend.setNumKeep(parser.value("num-keep").toInt());
     }
-    if(parser.isSet("num-predict")){
+    if (parser.isSet("num-predict")) {
         frontend.setNumPredict(parser.value("num-predict").toInt());
     }
     if (parser.isSet("top-k")) {
         frontend.setTopK(parser.value("top-k").toInt());
     }
-    if(parser.isSet("top-p")) {
+    if (parser.isSet("top-p")) {
         frontend.setTopP(parser.value("top-p").toDouble());
     }
     if (parser.isSet("min-p")) {
         frontend.setMinP(parser.value("min-p").toDouble());
     }
-    if(parser.isSet("tfs-z")){
+    if (parser.isSet("tfs-z")) {
         frontend.setTfsZ(parser.value("tfs-z").toDouble());
     }
     if (parser.isSet("typical-p")) {
@@ -220,14 +232,14 @@ void processCliOptions(const QCommandLineParser &parser, QtOllamaFrontend &front
     if (parser.isSet("repeat-last-n")) {
         frontend.setRepeatLastN(parser.value("repeat-last-n").toInt());
     }
-    if(parser.isSet("temperature")){
+    if (parser.isSet("temperature")) {
         frontend.setTemperature(parser.value("temperature").toDouble());
     }
-    if(parser.isSet("repeat-penalty")){
+    if (parser.isSet("repeat-penalty")) {
         frontend.setRepeatPenalty(parser.value("repeat-penalty").toDouble());
     }
     if (parser.isSet("presence-penalty")) {
-         frontend.setPresencePenalty(parser.value("presence-penalty").toDouble());
+        frontend.setPresencePenalty(parser.value("presence-penalty").toDouble());
     }
     if (parser.isSet("frequency-penalty")) {
         frontend.setFrequencyPenalty(parser.value("frequency-penalty").toDouble());
@@ -235,49 +247,48 @@ void processCliOptions(const QCommandLineParser &parser, QtOllamaFrontend &front
     if (parser.isSet("mirostat")) {
         frontend.setMirostat(parser.value("mirostat").toInt());
     }
-    if(parser.isSet("mirostat-tau")){
+    if (parser.isSet("mirostat-tau")) {
         frontend.setMirostatTau(parser.value("mirostat-tau").toDouble());
     }
-    if(parser.isSet("mirostat-eta")){
-       frontend.setMirostatEta(parser.value("mirostat-eta").toDouble());
+    if (parser.isSet("mirostat-eta")) {
+        frontend.setMirostatEta(parser.value("mirostat-eta").toDouble());
     }
     if (parser.isSet("penalize-newline")) {
         frontend.setPenalizeNewline(parser.value("penalize-newline") == "true");
     }
     if (parser.isSet("stop")) {
-       frontend.setStop(parser.value("stop"));
+        frontend.setStop(parser.value("stop"));
     }
     if (parser.isSet("numa")) {
         frontend.setNuma(parser.value("numa") == "true");
     }
-    if(parser.isSet("num-ctx")){
+    if (parser.isSet("num-ctx")) {
         frontend.setNumCtx(parser.value("num-ctx").toInt());
     }
-    if(parser.isSet("num-batch")){
+    if (parser.isSet("num-batch")) {
         frontend.setNumBatch(parser.value("num-batch").toInt());
     }
-    if(parser.isSet("num-gpu")){
+    if (parser.isSet("num-gpu")) {
         frontend.setNumGpu(parser.value("num-gpu").toInt());
     }
     if (parser.isSet("main-gpu")) {
-       frontend.setMainGpu(parser.value("main-gpu").toInt());
+        frontend.setMainGpu(parser.value("main-gpu").toInt());
     }
     if (parser.isSet("low-vram")) {
-       frontend.setLowVram(parser.value("low-vram") == "true");
+        frontend.setLowVram(parser.value("low-vram") == "true");
     }
     if (parser.isSet("vocab-only")) {
         frontend.setVocabOnly(parser.value("vocab-only") == "true");
     }
     if (parser.isSet("use-mmap")) {
-       frontend.setUseMmap(parser.value("use-mmap") == "true");
+        frontend.setUseMmap(parser.value("use-mmap") == "true");
     }
     if (parser.isSet("use-mlock")) {
         frontend.setUseMlock(parser.value("use-mlock") == "true");
     }
     if (parser.isSet("num-thread")) {
-       frontend.setNumThread(parser.value("num-thread").toInt());
+        frontend.setNumThread(parser.value("num-thread").toInt());
     }
-
 }
 
 int main(int argc, char *argv[]) {
@@ -291,7 +302,6 @@ int main(int argc, char *argv[]) {
     parser.process(app);
     processCliOptions(parser, frontend);
 
-
     // --- Actions ---
     if (parser.isSet("send")) {
         QString message = parser.value("send");
@@ -304,7 +314,7 @@ int main(int argc, char *argv[]) {
             }
             app.exit(0);
         });
-         QObject::connect(&frontend, &QtOllamaFrontend::receivedNetworkError, [&](const QVariant &error) {
+        QObject::connect(&frontend, &QtOllamaFrontend::receivedNetworkError, [&](const QVariant &error) {
             qDebug() << "Network error: " << error;
             app.exit(1);
         });
@@ -312,12 +322,32 @@ int main(int argc, char *argv[]) {
         qDebug() << "###$$$ message: " << message << "\n\n";
         qDebug() << "###$$$ imagePath: " << imagePath << "\n\n";
         frontend.sendMessage(message, imagePath);
+    } else if (parser.isSet("send-messages")) {
+        QString messagesString = parser.value("send-messages");
+        QJsonDocument doc = QJsonDocument::fromJson(messagesString.toUtf8());
+        QJsonArray messages = doc.array();
 
-    } else if (parser.isSet("list-models")) {
-        QObject::connect(&frontend, &QtOllamaFrontend::receivedModels, [&](const QVariant &result){
+        QObject::connect(&frontend, &QtOllamaFrontend::receivedResponse, [&](const QVariant &result) {
             if (result.canConvert<QString>()) {
                 std::cout << result.toString().toStdString() << std::endl;
-             }
+            } else {
+                qDebug() << "Received non-string response";
+            }
+            app.exit(0);
+        });
+        QObject::connect(&frontend, &QtOllamaFrontend::receivedNetworkError, [&](const QVariant &error) {
+            qDebug() << "Network error: " << error;
+            app.exit(1);
+        });
+
+        qDebug() << "###$$$ messages: " << messagesString << "\n\n";
+
+        frontend.sendMessages(messages);
+    } else if (parser.isSet("list-models")) {
+        QObject::connect(&frontend, &QtOllamaFrontend::receivedModels, [&](const QVariant &result) {
+            if (result.canConvert<QString>()) {
+                std::cout << result.toString().toStdString() << std::endl;
+            }
             app.exit(0);
         });
         QObject::connect(&frontend, &QtOllamaFrontend::receivedNetworkError, [&](const QVariant &error) {
@@ -325,20 +355,18 @@ int main(int argc, char *argv[]) {
             app.exit(1);
         });
         frontend.getModels();
-    }
-    else if(parser.isSet("pull")){
+    } else if (parser.isSet("pull")) {
         QString modelName = parser.value("pull");
         QObject::connect(&frontend, &QtOllamaFrontend::receivedPullModelProgress,
                          [&](QString modelName, QString status, qint64 bytesReceived, qint64 bytesTotal) {
-                             std::cout << "Pulling " << modelName.toStdString() << ": " << status.toStdString()
-                                       << " (" << bytesReceived << "/" << bytesTotal << ")" << std::endl;
+                             std::cout << "Pulling " << modelName.toStdString() << ": " << status.toStdString() << " (" << bytesReceived
+                                       << "/" << bytesTotal << ")" << std::endl;
                          });
         QObject::connect(&frontend, &QtOllamaFrontend::receivedPullModel, [&](const QVariant &result) {
             if (result.canConvert<QString>()) {
                 std::cout << "Successfully pulled: " << result.toString().toStdString() << std::endl;
             }
             app.exit(0);
-
         });
         QObject::connect(&frontend, &QtOllamaFrontend::receivedNetworkError, [&](const QVariant &error) {
             qDebug() << "Network error: " << error;
@@ -346,14 +374,13 @@ int main(int argc, char *argv[]) {
         });
         frontend.pullModel(modelName);
 
-    }
-    else if(parser.isSet("delete")){
+    } else if (parser.isSet("delete")) {
         QString modelName = parser.value("delete");
-        QObject::connect(&frontend, &QtOllamaFrontend::receivedDeleteModel, [&](const QVariant &result){
-           if (result.canConvert<QString>()) {
+        QObject::connect(&frontend, &QtOllamaFrontend::receivedDeleteModel, [&](const QVariant &result) {
+            if (result.canConvert<QString>()) {
                 std::cout << "Successfully deleted: " << result.toString().toStdString() << std::endl;
-           }
-           app.exit(0);
+            }
+            app.exit(0);
         });
         QObject::connect(&frontend, &QtOllamaFrontend::receivedNetworkError, [&](const QVariant &error) {
             qDebug() << "Network error: " << error;
@@ -366,7 +393,7 @@ int main(int argc, char *argv[]) {
             app.exit(0);
         });
         frontend.startNewChat();
-    }else if (parser.isSet("get-models-db")) {
+    } else if (parser.isSet("get-models-db")) {
         QVariantList models = frontend.getModelsFromDb();
         for (const QVariant &model : models) {
             QVariantMap modelMap = model.toMap();
@@ -387,24 +414,22 @@ int main(int argc, char *argv[]) {
         if (parser.value("export-format") == "plaintext") {
             format = QtOllamaFrontend::ExportFormatPlainText;
         }
-       QtOllamaFrontend::ExportMessageSelection selection = QtOllamaFrontend::ExportMessageSelectionAllMessages;
+        QtOllamaFrontend::ExportMessageSelection selection = QtOllamaFrontend::ExportMessageSelectionAllMessages;
         if (parser.value("export-selection") == "user") {
-           selection = QtOllamaFrontend::ExportMessageSelectionOnlyUserMessages;
+            selection = QtOllamaFrontend::ExportMessageSelectionOnlyUserMessages;
         } else if (parser.value("export-selection") == "assistant") {
-          selection = QtOllamaFrontend::ExportMessageSelectionOnlyAssistantMessages;
+            selection = QtOllamaFrontend::ExportMessageSelectionOnlyAssistantMessages;
         }
 
-      frontend.exportChatMessages(filePath, format, selection);
-      std::cout << "Chat exported to: " << filePath.toStdString() << std::endl;
-      app.exit(0);
+        frontend.exportChatMessages(filePath, format, selection);
+        std::cout << "Chat exported to: " << filePath.toStdString() << std::endl;
+        app.exit(0);
 
-    }
-     else {
+    } else {
         // If no action specified, print help
         parser.showHelp();
         app.exit(1); // Exit with an error code since no action was taken
     }
-
 
     return app.exec();
 }

@@ -1,0 +1,7 @@
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 4        # This is the key indent setting!
+UseTab: Never       # Use spaces instead of tabs
+TabWidth: 4         # If using tabs, how wide are they?
+ColumnLimit: 140       # Maximum line length
+BreakBeforeBraces: Attach

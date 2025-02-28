@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "qtollamafrontend.h"
 
 QtOllamaFrontend::QtOllamaFrontend(QObject* parent) : QObject(parent) {
@@ -1711,6 +1713,257 @@ void QtOllamaFrontend::sendMessage(QString content, QString jsonImageFilePaths) 
                         // output received message
                         emit receivedResponse(convertToBytes(outputMessage));
                     } else {
+                        setLoading(false);
+
+                        // set last message "done"
+                        QJsonObject message = m_messages.last().toObject();
+                        message.insert("done", QJsonValue(true));
+                        m_messages.replace(m_messages.size() - 1, message);
+
+                        // output received message
+                        emit receivedResponse(convertToBytes(message));
+                    }
+                }
+            }
+        });
+
+        // send request
+        tcpSocket->write(httpPostRequest.toUtf8(), qstrlen(httpPostRequest.toUtf8()));
+        if (!tcpSocket->waitForBytesWritten()) {
+            emitNetworkError(tcpSocket);
+        }
+    } else {
+        // convert json object to QByteArray
+        QByteArray jsonBytes = convertToBytes(params);
+        outputRequest(prepareJsonForLogOutput(params));
+
+        // form url
+        QUrl url("http://" + m_host + ":" + QString::number(m_port) + API_CHAT_URI);
+
+        // form request object
+        QNetworkRequest request = createNetworkRequest(url, jsonBytes);
+
+        // output log
+        emit log("json sent message", prepareJsonForLogOutput(params));
+
+        // send request
+        QNetworkReply* reply = m_networkAccessManager->post(request, jsonBytes);
+        connect(reply, SIGNAL(downloadProgress(qint64,qint64)),
+                this, SLOT(downloadProgress(qint64,qint64)));
+        connect(reply, SIGNAL(uploadProgress(qint64,qint64)),
+                this, SLOT(uploadProgress(qint64,qint64)));
+        connect(reply, &QNetworkReply::finished, [this, reply]() {
+            setLoading(false);
+
+            if (reply->error() != QNetworkReply::NoError) {
+                emitNetworkError(reply);
+                return;
+            }
+
+            QByteArray data = reply->readAll();
+            outputResponse(data);
+
+            // add new message to message history
+            QJsonObject receivedMessage = convertToJsonObject(data);
+            QJsonObject extractedMessage = receivedMessage.value("message").toObject();
+
+            // output log
+            emit log("json response", prepareJsonForLogOutput(receivedMessage));
+
+            QJsonObject message;
+            message.insert("role", "assistant");
+            message.insert("content", QJsonValue(extractedMessage.value("content")));
+            message.insert("done", QJsonValue(true));
+            m_messages.append(QJsonValue(message));
+
+            // output received message
+            emit receivedResponse(data);
+
+            // output tts
+            if (m_outputTts) {
+                emit say(message.value("content").toString());
+            }
+        });
+    }
+}
+
+void QtOllamaFrontend::sendMessages(QJsonArray messages) {
+    qDebug() << messages;
+
+    //if (content.isNull() || content.isEmpty()) {
+    //    return;
+    //}
+
+    setLoading(true);
+
+    // add new message to message history
+    //QJsonObject message;
+    //message.insert("role", "user");
+    //message.insert("content", QJsonValue(content));
+    //message.insert("done", QJsonValue(true));
+
+#if 0
+    // process json string of file paths to images
+    QJsonArray imageFilePaths;
+    if (!jsonImageFilePaths.isNull() && !jsonImageFilePaths.isEmpty()) {
+        imageFilePaths = convertToJsonArray(jsonImageFilePaths);
+    }
+    QJsonArray images;
+    for (int i = 0; i < imageFilePaths.count(); i++) {
+        QString imageFilePath = imageFilePaths[i].toString();
+
+        if (imageFilePath.startsWith("file:///")) {
+            for (int j = 0; j < QString("file:///").size(); j++) {
+                imageFilePath.removeFirst();
+            }
+        }
+
+        if (imageFilePath.isNull() || imageFilePath.isEmpty()) {
+            continue;
+        }
+
+        QImage image(imageFilePath);
+        if ((m_scaledImageWidth > 0) && (m_scaledImageHeight > 0)) {
+            // scale image down
+            image = image.scaled(QSize(m_scaledImageWidth, m_scaledImageHeight), Qt::KeepAspectRatio);
+        }
+        QByteArray imageData = getImageBytes(image);
+        QString imageBase64 = convertImageBytesToBase64(imageData);
+
+        images.append(QJsonValue(imageBase64));
+    }
+    if (images.count() > 0) {
+        message.insert("images", images);
+    }
+
+    m_messages.append(QJsonValue(message));
+#endif
+
+    m_messages = messages;
+
+    // form json object for parameters
+    QJsonObject params;
+    params.insert("model", QJsonValue(m_modelName));
+    params.insert("messages", m_messages);
+    //params.insert("format", QJsonValue("json"));
+    params.insert("stream", QJsonValue(m_stream));
+
+    // options
+    QJsonObject options = getSelectedOptions();
+    if (options.keys().size() > 0) {
+        params.insert("options", options);
+    }
+
+    if (m_stream) {
+        // convert json object to QByteArray
+        QByteArray jsonBytes = convertToBytes(params, false);
+
+        // output log
+        emit log("json data for send message request", jsonBytes);
+
+        // send request and receive streaming response
+        QTcpSocket *tcpSocket = new QTcpSocket(this);
+        tcpSocket->connectToHost(QHostAddress(m_host), m_port, QIODevice::ReadWrite);
+        if (!tcpSocket->waitForConnected()) {
+            emitNetworkError(tcpSocket);
+        }
+
+        QString httpPostRequest = createHttpPostRequest(API_CHAT_URI, jsonBytes);
+        emit log("sent HTTP POST request", httpPostRequest);
+        outputRequest(httpPostRequest.toUtf8());
+
+        connect(tcpSocket, &QAbstractSocket::errorOccurred, [this, tcpSocket]() {
+            emitNetworkError(tcpSocket);
+        });
+        connect(tcpSocket, &QIODevice::bytesWritten, [this, tcpSocket](qint64 bytes) {
+            qDebug() << "bytes written:" << bytes;
+        });
+        connect(tcpSocket, &QIODevice::readyRead, [this, tcpSocket]() {
+            QString data(tcpSocket->readAll());
+
+            // check if post was successful
+            if (data.startsWith("HTTP/1.1 200 OK")) {
+                qDebug() << "received HTTP POST response 200 OK";
+                emit log("received HTTP POST response 200 OK", data);
+
+                std::cout << std::endl;
+                std::cout << std::endl;
+
+                // add undone message
+                QJsonObject message;
+                message.insert("role", "assistant");
+                message.insert("content", QJsonValue(""));
+                message.insert("done", QJsonValue(false));
+                m_messages.append(QJsonValue(message));
+
+                // process json object
+                QStringList jsonStrings = extractJsonStrings(data);
+
+                for (QString jsonString : jsonStrings) {
+                    QJsonObject jsonObject = convertToJsonObject(jsonString);
+
+                    if (!jsonObject.value("done").toBool()) {
+                        QJsonObject receivedMessage = jsonObject.value("message").toObject();
+                        QJsonObject message = m_messages.last().toObject();
+
+                        // update last message
+                        QString content = message.value("content").toString() + receivedMessage.value("content").toString();
+                        message.insert("content", QJsonValue(content));
+                        m_messages.replace(m_messages.size() - 1, message);
+
+                        // output log
+                        //emit log("json response", prepareJsonForLogOutput(receivedMessage));
+
+                        // output message
+                        QJsonObject outputMessage;
+                        outputMessage.insert("message", message);
+
+                        // output received message
+                        //////emit receivedResponse(convertToBytes(outputMessage));
+                        std::cout << receivedMessage.value("content").toString().toStdString();
+                        std::cout.flush();
+                    }
+                    else {
+                        std::cout << std::endl;
+                        std::cout << std::endl;
+                        std::cout << std::endl;
+                    }
+                }
+            } else if (data.startsWith("HTTP/1.1")) {
+                qDebug() << "received HTTP POST response error code:" << data;
+                emit log("received HTTP POST response error code", data);
+            } else {
+                // process json object
+                QStringList jsonStrings = extractJsonStrings(data);
+
+                for (QString jsonString : jsonStrings) {
+                    QJsonObject jsonObject = convertToJsonObject(jsonString);
+
+                    if (!jsonObject.value("done").toBool()) {
+                        QJsonObject receivedMessage = jsonObject.value("message").toObject();
+                        QJsonObject message = m_messages.last().toObject();
+
+                        // update last message
+                        QString content = message.value("content").toString() + receivedMessage.value("content").toString();
+                        message.insert("content", QJsonValue(content));
+                        m_messages.replace(m_messages.size() - 1, message);
+
+                        // output log
+                        //emit log("json response", prepareJsonForLogOutput(receivedMessage));
+
+                        // output message
+                        QJsonObject outputMessage;
+                        outputMessage.insert("message", message);
+
+                        // output received message
+                        //////emit receivedResponse(convertToBytes(outputMessage));
+                        std::cout << receivedMessage.value("content").toString().toStdString();
+                        std::cout.flush();
+                    } else {
+                        std::cout << std::endl;
+                        std::cout << std::endl;
+                        std::cout << std::endl;
+
                         setLoading(false);
 
                         // set last message "done"

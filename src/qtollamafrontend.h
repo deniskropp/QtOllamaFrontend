@@ -444,6 +444,7 @@ public slots:
     void startNewChat();
     void exportChatMessages(QString targetFilePath, ExportFormat format, ExportMessageSelection messageSelection);
     void sendMessage(QString content, QString jsonImageFilePaths);
+    void sendMessages(QJsonArray messages);
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
     void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
     QString getSetting(QString key);

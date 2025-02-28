@@ -3,3 +3,4 @@ CMakeLists.txt.user
 .cache/
 .vscode/
 _NEW/
+.qmlls.ini
